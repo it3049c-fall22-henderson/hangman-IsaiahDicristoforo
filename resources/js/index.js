@@ -12,8 +12,12 @@ const wordHolderText = document.getElementById(`wordHolder`);
 const guessForm = document.getElementById(`guessForm`);
 const guessInput = document.getElementById(`guessInput`);
 
+const guessButton = document.getElementById("guessSubmitButton")
+
 // GAME RESET BUTTON
 const resetGame = document.getElementById(`resetGame`);
+
+let hangmanGame = null
 
 // CANVAS
 let canvas = document.getElementById(`hangmanCanvas`);
@@ -21,6 +25,9 @@ let canvas = document.getElementById(`hangmanCanvas`);
 // The following Try-Catch Block will catch the errors thrown
 try {
   // Instantiate a game Object using the Hangman class.
+  hangmanGame = new Hangman(canvas)
+
+
 
   // add a submit Event Listener for the to the difficultySelectionForm
   //    get the difficulty input
@@ -29,7 +36,12 @@ try {
   //       2. show the gameWrapper
   //       3. call the game getWordHolderText and set it to the wordHolderText
   //       4. call the game getGuessessText and set it to the guessesText
-  difficultySelectForm.addEventListener(`submit`, function (event) {});
+  difficultySelectForm.addEventListener(`submit`, function (event) {
+    event.preventDefault()
+    hangmanGame.start(difficultySelect.value, startGameCallback);
+
+  });
+  
 
   // add a submit Event Listener to the guessForm
   //    get the guess input
@@ -44,13 +56,53 @@ try {
   //      2. disable the guessButton
   //      3. show the resetGame button
   // if the game is won or lost, show an alert.
-  guessForm.addEventListener(`submit`, function (e) {});
+  guessForm.addEventListener(`submit`, function (e) {
+
+    e.preventDefault()
+    let guess = guessInput.value;
+    hangmanGame.guess(guess)
+
+    wordHolderText.innerHTML = hangmanGame.getWordHolderText()
+    guessesText.innerHTML = hangmanGame.getGuessesText()
+    guessInput.innerHTML = ""
+
+    if(hangmanGame.isOver){
+      guessInput.setAttribute("disabled", true)
+      guessButton.setAttribute("disabled", true)
+      resetGame.removeAttribute("disabled", true)
+    }
+
+    if(hangmanGame.didWin == true){
+      if(confirm("You won! Play again?")){
+        location.reload()
+      }
+    }else if(hangmanGame.isOver == true){
+      if(confirm("Game Over, You Lost. Play again?")){
+        location.reload()
+      }
+    }
+
+
+  });
 
   // add a click Event Listener to the resetGame button
   //    show the startWrapper
   //    hide the gameWrapper
-  resetGame.addEventListener(`click`, function (e) {});
+  resetGame.addEventListener(`click`, function (e) {
+    startWrapper.classList.remove("hidden")
+    gameWrapper.classList.add("hidden")
+  });
 } catch (error) {
   console.error(error);
   alert(error);
+}
+
+function startGameCallback(word){
+  startWrapper.classList.add("hidden")
+  gameWrapper.classList.remove("hidden")
+
+  wordHolderText.innerHTML = hangmanGame.getWordHolderText()
+  guessesText.innerHTML = hangmanGame.getGuessesText()
+
+  
 }
